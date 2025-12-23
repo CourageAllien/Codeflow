@@ -5,6 +5,8 @@ services:
     plan: free
     buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npm start
+    # Docker is disabled by default - use standard Next.js deployment
+    # To use Docker, remove this file and enable Docker in Render dashboard
     envVars:
       - key: NODE_ENV
         value: production
@@ -12,4 +14,11 @@ services:
         value: 1
       - key: DATABASE_URL
         value: file:./dev.db
+      # Optional: Add your API keys here if needed
+      # - key: ANTHROPIC_API_KEY
+      #   value: your_key_here
+      # - key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+      #   value: your_key_here
+      # - key: CLERK_SECRET_KEY
+      #   value: your_key_here
 
