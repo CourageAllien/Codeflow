@@ -1,6 +1,15 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Terminal } from "@/components/terminal/terminal";
 import { Button } from "@/components/ui/button";
+
+function TerminalFallback() {
+  return (
+    <div className="h-64 bg-card border border-border rounded-lg p-6 flex items-center justify-center">
+      <p className="text-muted-foreground">Loading terminal...</p>
+    </div>
+  );
+}
 
 export default function HomePage() {
   return (
@@ -33,7 +42,9 @@ export default function HomePage() {
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
               <span className="ml-4 text-sm text-muted-foreground">coldflow v1.0.0</span>
             </div>
-            <Terminal demoMode={true} />
+            <Suspense fallback={<TerminalFallback />}>
+              <Terminal demoMode={true} />
+            </Suspense>
           </div>
         </div>
 

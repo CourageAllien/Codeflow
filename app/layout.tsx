@@ -9,27 +9,34 @@ export const metadata: Metadata = {
   description: "Stop switching between 8 tabs. Run your entire cold email operation from one command line.",
 };
 
-// Conditionally wrap with ClerkProvider only if keys are configured
-function ConditionalClerkProvider({ children }: { children: React.ReactNode }) {
-  const hasClerkKeys = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY;
-  
-  if (hasClerkKeys) {
-    const { ClerkProvider } = require("@clerk/nextjs");
-    return <ClerkProvider>{children}</ClerkProvider>;
-  }
-  
-  return <>{children}</>;
-}
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Check for Clerk keys at build time
+  const hasClerkKeys = 
+    typeof process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== 'undefined' && 
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY !== '' &&
+    typeof process.env.CLERK_SECRET_KEY !== 'undefined' && 
+    process.env.CLERK_SECRET_KEY !== '';
+
+  let Provider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+  
+  if (hasClerkKeys) {
+    try {
+      const { ClerkProvider } = require("@clerk/nextjs");
+      Provider = ClerkProvider;
+    } catch (e) {
+      // Clerk not available, use default
+      console.warn("Clerk keys found but package not available");
+    }
+  }
+
   return (
     <html lang="en" className="dark">
       <body className={inter.className}>
-        <ConditionalClerkProvider>{children}</ConditionalClerkProvider>
+        <Provider>{children}</Provider>
       </body>
     </html>
   );
