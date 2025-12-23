@@ -1,0 +1,249 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizations Organization[]
+  commandHistory CommandHistory[]
+  commandTemplates CommandTemplate[]
+  sandboxSnapshots SandboxSnapshot[]
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  plan        String   @default("free") // free, starter, pro, agency, enterprise
+  sandboxMode Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  workspaces  Workspace[]
+  integrations Integration[]
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  orgId       String
+  name        String
+  clientName  String?
+  settings    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  leads       Lead[]
+  campaigns   Campaign[]
+  workflows   Workflow[]
+
+  @@index([orgId])
+}
+
+model Integration {
+  id                String   @id @default(cuid())
+  orgId             String
+  workspaceId       String?
+  provider          String   // apollo, millionverifier, instantly, etc.
+  credentialsEncrypted String // encrypted credentials
+  status            String   @default("connected") // connected, disconnected, error
+  lastSyncAt        DateTime?
+  rateLimitResetAt  DateTime?
+  quotaRemaining    Int?
+  metadata          Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  integrationStates IntegrationState[]
+
+  @@index([orgId])
+  @@index([provider])
+}
+
+model IntegrationState {
+  id            String   @id @default(cuid())
+  integrationId String
+  lastSyncAt    DateTime?
+  syncStatus    String   @default("idle")
+  rateLimitResetAt DateTime?
+  quotaRemaining Int?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  integration Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@index([integrationId])
+}
+
+model Lead {
+  id              String   @id @default(cuid())
+  workspaceId     String
+  data            Json     // full lead data
+  emailStatus     String?  // valid, risky, invalid, catchall
+  enrichmentStatus String? // pending, complete, failed
+  source          String?  // apollo, sandbox, import, etc.
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  campaignLeads   CampaignLead[]
+  replies         Reply[]
+
+  @@index([workspaceId])
+  @@index([emailStatus])
+}
+
+model Campaign {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  platform    String?  // instantly, smartlead, etc.
+  status      String   @default("draft") // draft, active, paused, completed
+  settings    Json?
+  stats       Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  campaignLeads CampaignLead[]
+  replies       Reply[]
+
+  @@index([workspaceId])
+  @@index([status])
+}
+
+model CampaignLead {
+  id          String   @id @default(cuid())
+  campaignId  String
+  leadId      String
+  status      String   @default("pending") // pending, sent, delivered, opened, clicked, replied
+  step        Int      @default(1)
+  lastActivity DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  lead     Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, leadId])
+  @@index([campaignId])
+  @@index([leadId])
+}
+
+model Reply {
+  id          String   @id @default(cuid())
+  campaignId  String
+  leadId      String
+  content     String
+  classification String? // positive, negative, neutral, ooo, bounce
+  handled     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  lead     Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([leadId])
+  @@index([classification])
+  @@index([handled])
+}
+
+model Workflow {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  triggerType String   // webhook, schedule, event
+  triggerConfig Json
+  steps       Json     // workflow steps
+  enabled     Boolean  @default(true)
+  lastRun     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workflowRuns WorkflowRun[]
+
+  @@index([workspaceId])
+  @@index([enabled])
+}
+
+model WorkflowRun {
+  id          String   @id @default(cuid())
+  workflowId  String
+  status      String   // running, completed, failed
+  inputData   Json?
+  outputData  Json?
+  errorDetails Json?
+  durationMs  Int?
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@index([status])
+}
+
+model CommandHistory {
+  id              String   @id @default(cuid())
+  userId          String
+  workspaceId     String?
+  commandText     String
+  parsedIntent    Json?
+  executionTimeMs Int?
+  success         Boolean
+  errorMessage    String?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([createdAt])
+}
+
+model CommandTemplate {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  commandText   String
+  parameters    Json?
+  usageCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model SandboxSnapshot {
+  id          String   @id @default(cuid())
+  userId      String
+  snapshotName String
+  stateJson   Json
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
