@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Only use standalone for Docker deployments
-  // For standard Render deployment, remove this line
-  // output: 'standalone',
+  // Use standalone output only if explicitly set via environment variable
+  // This allows Docker builds to use standalone while standard deployments don't
+  ...(process.env.NEXT_STANDALONE === 'true' ? { output: 'standalone' } : {}),
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if
