@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Terminal } from "@/components/terminal/terminal";
 import { Button } from "@/components/ui/button";
 
@@ -12,15 +14,35 @@ function TerminalFallback() {
 }
 
 export default function HomePage() {
+  useEffect(() => {
+    // Ensure page is visible
+    document.body.style.backgroundColor = '#0a0a0b';
+    document.body.style.color = '#fafafa';
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background text-foreground" style={{ backgroundColor: '#0a0a0b', color: '#fafafa' }}>
+    <div 
+      className="min-h-screen bg-background text-foreground" 
+      style={{ 
+        backgroundColor: '#0a0a0b', 
+        color: '#fafafa',
+        minHeight: '100vh',
+        padding: '2rem'
+      }}
+    >
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4">
+          <h1 
+            className="text-5xl font-bold mb-4"
+            style={{ color: '#fafafa' }}
+          >
             THE COMMAND CENTER FOR COLD EMAIL
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p 
+            className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
+            style={{ color: '#a1a1aa' }}
+          >
             Stop switching between 8 tabs. Run your entire cold email operation from one command line.
           </p>
           <div className="flex gap-4 justify-center">
@@ -35,12 +57,17 @@ export default function HomePage() {
 
         {/* Interactive Terminal Demo */}
         <div className="max-w-4xl mx-auto mb-16">
-          <div className="bg-card border border-border rounded-lg p-6">
+          <div 
+            className="bg-card border border-border rounded-lg p-6"
+            style={{ backgroundColor: '#141415', borderColor: '#27272a' }}
+          >
             <div className="mb-4 flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span className="ml-4 text-sm text-muted-foreground">coldflow v1.0.0</span>
+              <span className="ml-4 text-sm text-muted-foreground" style={{ color: '#a1a1aa' }}>
+                coldflow v1.0.0
+              </span>
             </div>
             <Suspense fallback={<TerminalFallback />}>
               <Terminal demoMode={true} />
@@ -50,21 +77,36 @@ export default function HomePage() {
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-2">One Command, Many Tools</h3>
-            <p className="text-muted-foreground">
+          <div 
+            className="bg-card border border-border rounded-lg p-6"
+            style={{ backgroundColor: '#141415', borderColor: '#27272a' }}
+          >
+            <h3 className="text-xl font-semibold mb-2" style={{ color: '#fafafa' }}>
+              One Command, Many Tools
+            </h3>
+            <p className="text-muted-foreground" style={{ color: '#a1a1aa' }}>
               Orchestrate Apollo, Instantly, MillionVerifier, and more with natural language commands.
             </p>
           </div>
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-2">Sandbox Mode</h3>
-            <p className="text-muted-foreground">
+          <div 
+            className="bg-card border border-border rounded-lg p-6"
+            style={{ backgroundColor: '#141415', borderColor: '#27272a' }}
+          >
+            <h3 className="text-xl font-semibold mb-2" style={{ color: '#fafafa' }}>
+              Sandbox Mode
+            </h3>
+            <p className="text-muted-foreground" style={{ color: '#a1a1aa' }}>
               Learn without risk. Test everything with dummy data before going live.
             </p>
           </div>
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-2">AI-Powered</h3>
-            <p className="text-muted-foreground">
+          <div 
+            className="bg-card border border-border rounded-lg p-6"
+            style={{ backgroundColor: '#141415', borderColor: '#27272a' }}
+          >
+            <h3 className="text-xl font-semibold mb-2" style={{ color: '#fafafa' }}>
+              AI-Powered
+            </h3>
+            <p className="text-muted-foreground" style={{ color: '#a1a1aa' }}>
               Personalization, reply classification, and campaign insights powered by AI.
             </p>
           </div>
@@ -73,4 +115,3 @@ export default function HomePage() {
     </div>
   );
 }
-

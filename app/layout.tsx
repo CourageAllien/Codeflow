@@ -34,8 +34,31 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en" className="dark" style={{ backgroundColor: '#0a0a0b' }}>
-      <body className={inter.className} style={{ backgroundColor: '#0a0a0b', color: '#fafafa', margin: 0, padding: 0 }}>
+    <html lang="en" className="dark" style={{ backgroundColor: '#0a0a0b', margin: 0, padding: 0 }}>
+      <head>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            html, body { 
+              background-color: #0a0a0b !important; 
+              color: #fafafa !important; 
+              margin: 0 !important;
+              padding: 0 !important;
+              min-height: 100vh;
+            }
+          `
+        }} />
+      </head>
+      <body 
+        className={inter.className} 
+        style={{ 
+          backgroundColor: '#0a0a0b', 
+          color: '#fafafa', 
+          margin: 0, 
+          padding: 0,
+          minHeight: '100vh'
+        }}
+      >
         <Provider>{children}</Provider>
       </body>
     </html>
