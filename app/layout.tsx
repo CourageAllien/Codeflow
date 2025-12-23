@@ -34,8 +34,8 @@ export default function RootLayout({
   }
 
   return (
-    <html lang="en" className="dark">
-      <body className={inter.className}>
+    <html lang="en" className="dark" style={{ backgroundColor: '#0a0a0b' }}>
+      <body className={inter.className} style={{ backgroundColor: '#0a0a0b', color: '#fafafa', margin: 0, padding: 0 }}>
         <Provider>{children}</Provider>
       </body>
     </html>

@@ -13,7 +13,7 @@ function TerminalFallback() {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground" style={{ backgroundColor: '#0a0a0b', color: '#fafafa' }}>
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
